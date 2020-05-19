@@ -16,7 +16,7 @@
 
 #endregion
 
-Import-Module ItemGroup\Group -Force
+Import-Module -Name $PSScriptRoot\..\Group -Force
 
 Describe 'Import-ItemGroup' {
     InModuleScope Group {

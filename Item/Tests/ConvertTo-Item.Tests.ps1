@@ -16,7 +16,7 @@
 
 #endregion
 
-Import-Module ItemGroup\Item -Force
+Import-Module -Name $PSScriptRoot\..\Item -Force
 
 Describe 'ConvertTo-Item' {
    InModuleScope Item {

@@ -255,4 +255,4 @@ function Test-Item {
     }
 }
 
-Import-Module ItemGroup\Utils
+Import-Module -Name $PSScriptRoot\..\Utils

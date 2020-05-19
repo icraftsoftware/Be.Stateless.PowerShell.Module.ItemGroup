@@ -16,8 +16,7 @@
 
 #endregion
 
-Import-Module ItemGroup\Item -Force
-Import-Module ItemGroup\Utils -Force
+Import-Module -Name $PSScriptRoot\..\Item -Force
 
 Describe 'Test-Item-Valid' {
    InModuleScope Item {

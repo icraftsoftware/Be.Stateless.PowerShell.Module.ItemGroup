@@ -238,5 +238,5 @@ function Resolve-DefaultItem {
         Merge-HashTable -Exclude 'Name' -Force
 }
 
-Import-Module ItemGroup\Item
-Import-Module ItemGroup\Utils
+Import-Module -Name $PSScriptRoot\..\Item
+Import-Module -Name $PSScriptRoot\..\Utils
