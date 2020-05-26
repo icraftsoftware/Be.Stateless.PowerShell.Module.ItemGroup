@@ -36,6 +36,7 @@ function Compare-Item {
         [string]
         $Prefix = ''
     )
+    Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
     if ($null -eq $ReferenceItem) { $ReferenceItem = [PSCustomObject]@{ } }
     if ($null -eq $DifferenceItem) { $DifferenceItem = [PSCustomObject]@{ } }
     $referenceProperties = @( $ReferenceItem | Get-Member -MemberType NoteProperty, ScriptProperty | Select-Object -ExpandProperty Name)
@@ -67,6 +68,9 @@ function ConvertTo-Item {
         [hashtable[]]
         $HashTable
     )
+    begin {
+        Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
+    }
     process {
         @(
             $HashTable |
@@ -120,6 +124,7 @@ function Test-Item {
     )
 
     begin {
+        Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         switch ($PSCmdlet.ParameterSetName) {
             'unicity' {
                 $allValidItems = @()
@@ -128,7 +133,7 @@ function Test-Item {
     }
     process {
 
-        function private:Get-ItemPropertyMembers {
+        function Get-ItemPropertyMembers {
             [CmdletBinding()]
             [OutputType([psobject[]])]
             param(
@@ -146,7 +151,7 @@ function Test-Item {
             }
         }
 
-        function private:Trace-InvalidItem {
+        function Trace-InvalidItem {
             [CmdletBinding()]
             [OutputType([void])]
             param(
@@ -155,7 +160,7 @@ function Test-Item {
                 [psobject]
                 $Item
             )
-            if (@('SilentlyContinue', 'Ignore') -notcontains (Resolve-WarningAction $PSBoundParameters)) {
+            if ($WarningPreference -notin ('SilentlyContinue', 'Ignore')) {
                 Write-Warning -Message 'The following Item is invalid because it is either ill-formed or misses either a valid Path or Name property:'
                 # cast to PSCustomObject to ensure Format-List has an output format consistent among HashTable and PSCustomObject
                 ([PSCustomObject]$Item) | Format-List | Out-String -Stream | Where-Object { -not([string]::IsNullOrWhitespace($_)) } | ForEach-Object -Process {
@@ -169,7 +174,7 @@ function Test-Item {
                 $Item | ForEach-Object -Process { $_ } -PipelineVariable currentItem | ForEach-Object -Process {
                     $isMember = $false
                     if (Test-Item -Item $currentItem -WellFormed) {
-                        $members = private:Get-ItemPropertyMembers -Item $currentItem
+                        $members = Get-ItemPropertyMembers -Item $currentItem
                         switch ($Mode) {
                             'All' {
                                 $isMember = $Property | Where-Object -FilterScript { $members -notcontains $_ } | Test-None
@@ -188,7 +193,7 @@ function Test-Item {
             'unicity' {
                 $allValidItems += @(
                     $Item | ForEach-Object -Process { $_ } -PipelineVariable currentItem | Where-Object -FilterScript {
-                        Test-Item -Item $currentItem -Valid -WarningAction:(Resolve-WarningAction $PSBoundParameters)
+                        Test-Item -Item $currentItem -Valid
                     }
                 )
             }
@@ -206,21 +211,21 @@ function Test-Item {
                         }
                     }
                     if (-not $isValid) {
-                        private:Trace-InvalidItem -Item $currentItem -WarningAction:(Resolve-WarningAction $PSBoundParameters)
+                        Trace-InvalidItem -Item $currentItem
                     }
                     $isValid
                 }
             }
             'well-formedness' {
                 $Item | ForEach-Object -Process { $_ } -PipelineVariable currentItem | ForEach-Object -Process {
-                    private:Get-ItemPropertyMembers -Item $currentItem | Test-Any
+                    Get-ItemPropertyMembers -Item $currentItem | Test-Any
                 }
             }
         }
     }
     end {
 
-        function private:Trace-DuplicateItem {
+        function Trace-DuplicateItem {
             [CmdletBinding()]
             [OutputType([Microsoft.PowerShell.Commands.GroupInfo])]
             param(
@@ -229,7 +234,7 @@ function Test-Item {
                 $GroupInfo
             )
             process {
-                if (@('SilentlyContinue', 'Ignore') -notcontains (Resolve-WarningAction $PSBoundParameters)) {
+                if ($WarningPreference -notin ('SilentlyContinue', 'Ignore')) {
                     $GroupInfo.Group | ForEach-Object -Process {
                         Write-Warning -Message "The following Item '$($GroupInfo.Name)' has been defined multiple times:"
                         # cast to PSCustomObject to ensure Format-List has an output format consistent among HashTable and PSCustomObject
@@ -248,11 +253,9 @@ function Test-Item {
                 $allValidItems |
                     Group-Object -Property { if (Test-Item -Item $_ -Property Path) { $_.Path } else { $_.Name } } |
                     Where-Object -FilterScript { $_.Count -gt 1 } |
-                    private:Trace-DuplicateItem -WarningAction:(Resolve-WarningAction $PSBoundParameters) |
+                    Trace-DuplicateItem |
                     Test-None
             }
         }
     }
 }
-
-Import-Module -Name $PSScriptRoot\..\Utils

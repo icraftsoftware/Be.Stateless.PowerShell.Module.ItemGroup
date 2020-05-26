@@ -30,6 +30,7 @@ function Compare-ItemGroup {
         [hashtable]
         $DifferenceItemGroup
     )
+    Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
     $ReferenceItemGroup.Keys + $DifferenceItemGroup.Keys | Sort-Object -Unique -PipelineVariable key | ForEach-Object -Process {
         if ($ReferenceItemGroup.ContainsKey($key) -and !$DifferenceItemGroup.ContainsKey($key)) {
             [PSCustomObject]@{ Key = $key ; ReferenceValue = $ReferenceItemGroup.$key ; SideIndicator = '<' ; DifferenceValue = $null } | Tee-Object -Variable difference
@@ -61,18 +62,19 @@ function Compare-ItemGroup {
 
 function Expand-ItemGroup {
     [CmdletBinding()]
-    [OutputType([PSCustomObject[]])]
+    [OutputType([hashtable])]
     param(
         [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true)]
         [hashtable[]]
         $ItemGroup
     )
     begin {
+        Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         $expandedItemGroup = @{ }
     }
     process {
         # warns about every duplicate ItemGroup and Item
-        $ItemGroup | Test-ItemGroup -Unique -WarningAction:(Resolve-WarningAction $PSBoundParameters) | Out-Null
+        $ItemGroup | Test-ItemGroup -Unique | Out-Null
         $ItemGroup | ForEach-Object -Process { $_ } -PipelineVariable currentItemGroup | Select-Object -ExpandProperty Keys -PipelineVariable itemGroupName | ForEach-Object -Process {
             Write-Information -MessageData "Expanding ItemGroup '$itemGroupName'."
             if ($currentItemGroup.$itemGroupName -is [hashtable]) {
@@ -146,6 +148,7 @@ function Import-ItemGroup {
         }
     }
     begin {
+        Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         $location = Get-Location
     }
     process {
@@ -187,6 +190,7 @@ function Test-ItemGroup {
         $Unique
     )
     begin {
+        Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
         $allItemGroups = @()
     }
     process {
@@ -194,7 +198,7 @@ function Test-ItemGroup {
     }
     end {
 
-        function private:Trace-DuplicateItemGroup {
+        function Trace-DuplicateItemGroup {
             [CmdletBinding()]
             [OutputType([Microsoft.PowerShell.Commands.GroupInfo])]
             param(
@@ -207,17 +211,16 @@ function Test-ItemGroup {
                 $GroupInfo
             }
         }
-
         if ($Unique) {
             $itemGroupsAreUnique = $allItemGroups |
                 Select-Object -ExpandProperty Keys |
                 Group-Object |
                 Where-Object -FilterScript { $_.Count -gt 1 } |
-                private:Trace-DuplicateItemGroup -WarningAction:(Resolve-WarningAction $PSBoundParameters) |
+                Trace-DuplicateItemGroup |
                 Test-None
             $itemsAreUnique = $allItemGroups |
                 ForEach-Object -Process { $_.Values } |
-                Test-Item -Unique -WarningAction:(Resolve-WarningAction $PSBoundParameters)
+                Test-Item -Unique
             $itemGroupsAreUnique -and $itemsAreUnique
         }
     }
@@ -231,6 +234,7 @@ function Resolve-DefaultItem {
         [hashtable[]]
         $ItemGroup
     )
+    Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
     # compute default Item, which defines inheritable default properties, from all Items whose Name = '*'
     $ItemGroup |
         ForEach-Object -Process { $_ } |
@@ -239,4 +243,3 @@ function Resolve-DefaultItem {
 }
 
 Import-Module -Name $PSScriptRoot\..\Item
-Import-Module -Name $PSScriptRoot\..\Utils
