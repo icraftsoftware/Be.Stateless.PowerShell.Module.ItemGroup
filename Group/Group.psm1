@@ -76,7 +76,7 @@ function Expand-ItemGroup {
         # warns about every duplicate ItemGroup and Item
         $ItemGroup | Test-ItemGroup -Unique | Out-Null
         $ItemGroup | ForEach-Object -Process { $_ } -PipelineVariable currentItemGroup | Select-Object -ExpandProperty Keys -PipelineVariable itemGroupName | ForEach-Object -Process {
-            Write-Information -MessageData "Expanding ItemGroup '$itemGroupName'."
+            Write-Information "Expanding ItemGroup '$itemGroupName'."
             if ($currentItemGroup.$itemGroupName -is [hashtable]) {
                 # forward property Hashtable to expandedItemGroup and ...
                 $expandedItemGroup.$itemGroupName = $currentItemGroup.$itemGroupName
@@ -153,7 +153,7 @@ function Import-ItemGroup {
     }
     process {
         $absolutePath = Resolve-Path -Path $Path
-        Write-Information -MessageData "Importing ItemGroups from file '$absolutePath'."
+        Write-Information "Importing ItemGroups from file '$absolutePath'."
         # make sure current folder for each ItemGroup definition file is its containing folder
         $itemGroupFolderPath = Split-Path -Path $absolutePath -Parent
         Write-Verbose -Message "Setting location to '$itemGroupFolderPath'."
