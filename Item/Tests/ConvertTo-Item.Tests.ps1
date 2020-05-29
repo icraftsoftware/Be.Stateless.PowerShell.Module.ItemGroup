@@ -43,15 +43,15 @@ Describe 'ConvertTo-Item' {
 
       Context 'When inputs are given by argument' {
          It 'Returns null for an empty HashTable.' {
-            ConvertTo-Item -HashTable @{ } | Should -Be $null
+            ConvertTo-Item -HashTable @{ } | Should -BeNullOrEmpty
          }
          It 'Returns null for an empty array.' {
             $hashTables = @()
-            ConvertTo-Item -HashTable $hashTables | Should -Be $null
+            ConvertTo-Item -HashTable $hashTables | Should -BeNullOrEmpty
          }
          It 'Returns null for an array of empty HashTables.' {
             $hashTables = @( @{ } , @{ } )
-            ConvertTo-Item -HashTable $hashTables | Should -Be $null
+            ConvertTo-Item -HashTable $hashTables | Should -BeNullOrEmpty
          }
          It 'Converts an array of hastables.' {
             $hashTables = @(
@@ -91,13 +91,13 @@ Describe 'ConvertTo-Item' {
 
       Context 'When inputs are given by pipeline' {
          It 'Returns null for an empty HashTable.' {
-            @{ } | ConvertTo-Item | Should -Be $null
+            @{ } | ConvertTo-Item | Should -BeNullOrEmpty
          }
          It 'Returns null for an empty array.' {
-            @() | ConvertTo-Item | Should -Be $null
+            @() | ConvertTo-Item | Should -BeNullOrEmpty
          }
          It 'Returns null for an array of empty HashTables.' {
-            @( @{ } , @{ } ) | ConvertTo-Item | Should -Be $null
+            @( @{ } , @{ } ) | ConvertTo-Item | Should -BeNullOrEmpty
          }
          It 'Converts an array of hastables.' {
             $hashTables = @(

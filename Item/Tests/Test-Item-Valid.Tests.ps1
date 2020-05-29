@@ -25,16 +25,16 @@ Describe 'Test-Item-Valid' {
          It 'Returns always false.' {
             $item = @{ Name = 'Stark' }
             # although the Item is well formed
-            Test-Item -Item $item -WellFormed | Should -Be $true
+            Test-Item -Item $item -WellFormed | Should -BeTrue
             # and Validity check is satisfied
-            Test-Item -Item $item -Valid | Should -Be $true
+            Test-Item -Item $item -Valid | Should -BeTrue
 
             # it will be assumed not to be well formed
             Mock -CommandName Test-Item -ParameterFilter { $WellFormed.IsPresent } -MockWith { $false <# assumes Item is not wellformed #> }
-            Test-Item -Item $item -WellFormed | Should -Be $false
+            Test-Item -Item $item -WellFormed | Should -BeFalse
 
             # and Validity check will not be satisfied anymore
-            Test-Item -Item $item -Valid -WarningAction SilentlyContinue | Should -Be $false
+            Test-Item -Item $item -Valid -WarningAction SilentlyContinue | Should -BeFalse
 
             Assert-MockCalled -CommandName Test-Item -ParameterFilter { $WellFormed.IsPresent } -Exactly 2
          }

@@ -44,9 +44,9 @@ Describe 'Compare-Item' {
 
             $result.Length | Should -Be 1
             $result.Key | Should -Be 'a'
-            $result.ReferenceValue | Should -Be $null
+            $result.ReferenceValue | Should -BeNullOrEmpty
             $result.SideIndicator | Should -Be "<"
-            $result.DifferenceValue | Should -Be $null
+            $result.DifferenceValue | Should -BeNullOrEmpty
          }
       }
 
@@ -59,9 +59,9 @@ Describe 'Compare-Item' {
 
             $result.Length | Should -Be 1
             $result.Key | Should -Be 'a'
-            $result.ReferenceValue | Should -Be $null
+            $result.ReferenceValue | Should -BeNullOrEmpty
             $result.SideIndicator | Should -Be ">"
-            $result.DifferenceValue | Should -Be $null
+            $result.DifferenceValue | Should -BeNullOrEmpty
          }
       }
 
@@ -76,7 +76,7 @@ Describe 'Compare-Item' {
             $result.Key | Should -Be 'a'
             $result.ReferenceValue | Should -Be 'value'
             $result.SideIndicator | Should -Be "<>"
-            $result.DifferenceValue | Should -Be $null
+            $result.DifferenceValue | Should -BeNullOrEmpty
          }
       }
 

@@ -25,16 +25,16 @@ Describe 'Test-Item-Property' {
          It 'Returns always false.' {
             $item = @{ Condition = $null }
             # even though the Item is well formed
-            Test-Item -Item $item -WellFormed | Should -Be $true
+            Test-Item -Item $item -WellFormed | Should -BeTrue
             # and property membership is satisfied
-            Test-Item -Item $item -Property Condition | Should -Be $true
+            Test-Item -Item $item -Property Condition | Should -BeTrue
 
             # it will be assumed not to be well formed
             Mock -CommandName Test-Item -ParameterFilter { $WellFormed.IsPresent } -MockWith { $false <# assumes Item is not wellformed #> } -Verifiable
-            Test-Item -Item $item -WellFormed | Should -Be $false
+            Test-Item -Item $item -WellFormed | Should -BeFalse
 
             # and property membership will not be satisfied anymore
-            Test-Item -Item $item -Property Condition | Should -Be $false
+            Test-Item -Item $item -Property Condition | Should -BeFalse
 
             Assert-VerifiableMock
          }

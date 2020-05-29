@@ -21,19 +21,19 @@ Import-Module -Name $PSScriptRoot\..\Item -Force
 Describe 'Test-Item-Wellformed' {
    InModuleScope Item {
       It 'Returns false for null.' {
-         $null | Test-Item -Wellformed | Should -Be $false
+         $null | Test-Item -Wellformed | Should -BeFalse
       }
       It 'Returns false for an empty HashTable.' {
-         @{ } | Test-Item -Wellformed | Should -Be $false
+         @{ } | Test-Item -Wellformed | Should -BeFalse
       }
       It 'Returns true for a HashTable with a property.' {
-         @{Name = 'name' ; x = $null } | Test-Item -Wellformed | Should -Be $true
+         @{Name = 'name' ; x = $null } | Test-Item -Wellformed | Should -BeTrue
       }
       It 'Returns false for an empty custom object.' {
-         ([pscustomobject]@{ }) | Test-Item -Wellformed | Should -Be $false
+         ([pscustomobject]@{ }) | Test-Item -Wellformed | Should -BeFalse
       }
       It 'Returns true for a custom object with a property.' {
-         [pscustomobject]@{Name = 'name' ; x = $null } | Test-Item -Wellformed | Should -Be $true
+         [pscustomobject]@{Name = 'name' ; x = $null } | Test-Item -Wellformed | Should -BeTrue
       }
       It 'Returns empty for an empty array.' {
          @() | Test-Item -Wellformed | Should -Be @()
