@@ -162,7 +162,7 @@ function Test-Item {
             )
             if ($WarningPreference -notin ('SilentlyContinue', 'Ignore')) {
                 Write-Warning -Message 'The following Item is invalid because it is either ill-formed or misses either a valid Path or Name property:'
-                # cast to PSCustomObject to ensure Format-List has an output format consistent among HashTable and PSCustomObject
+                # cast to PSCustomObject to ensure Format-List has an output format consistent across HashTable and PSCustomObject
                 ([PSCustomObject]$Item) | Format-List | Out-String -Stream | Where-Object { -not([string]::IsNullOrWhitespace($_)) } | ForEach-Object -Process {
                     Write-Warning -Message $_.Trim()
                 }
@@ -203,9 +203,7 @@ function Test-Item {
                     if (Test-Item -Item $currentItem -WellFormed) {
                         # Path property has the precedence over the Name property, but either one is required
                         if (Test-Item -Item $currentItem -Property Path) {
-                            if ($null -ne $currentItem.Path -and (Test-Path -Path $currentItem.Path)) {
-                                $isValid = -not(Get-Item -Path $currentItem.Path | Select-Object -ExpandProperty PSIsContainer)
-                            }
+                            $isValid = $null -ne $currentItem.Path -and (Test-Path -Path $currentItem.Path -PathType Leaf)
                         } elseif (Test-Item -Item $currentItem -Property Name) {
                             $isValid = -not([string]::IsNullOrWhitespace($currentItem.Name))
                         }
@@ -237,7 +235,7 @@ function Test-Item {
                 if ($WarningPreference -notin ('SilentlyContinue', 'Ignore')) {
                     $GroupInfo.Group | ForEach-Object -Process {
                         Write-Warning -Message "The following Item '$($GroupInfo.Name)' has been defined multiple times:"
-                        # cast to PSCustomObject to ensure Format-List has an output format consistent among HashTable and PSCustomObject
+                        # cast to PSCustomObject to ensure Format-List has an output format consistent across HashTable and PSCustomObject
                         ([PSCustomObject]$_) | Format-List | Out-String -Stream | Where-Object { -not([string]::IsNullOrWhitespace($_)) } | ForEach-Object -Process {
                             Write-Warning -Message $_.Trim()
                         }
