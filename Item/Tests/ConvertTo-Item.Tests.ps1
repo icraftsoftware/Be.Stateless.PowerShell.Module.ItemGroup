@@ -23,7 +23,7 @@ Describe 'ConvertTo-Item' {
 
       Context 'When input is a plain old HashTable' {
          It 'Returns a plain old custom object with no script property.' {
-            $hashTable = @{ FirstName = 'Tony'; LastName = 'Stark' }
+            $hashTable = @{ FirstName = 'Tony' ; LastName = 'Stark' }
             $object = ConvertTo-Item -HashTable $hashTable
             $object | Should -BeOfType [PSCustomObject]
             $object | Get-Member -Name FirstName | Select-Object -ExpandProperty MemberType | Should -Be ([System.Management.Automation.PSMemberTypes]::NoteProperty)
@@ -33,7 +33,7 @@ Describe 'ConvertTo-Item' {
 
       Context 'When input is a HashTable with a script block' {
          It 'Returns a plain old custom object with a script property.' {
-            $hashTable = @{ FirstName = 'Tony'; LastName = 'Stark'; DisplayName = { "{0} {1}" -f $this.FirstName, $this.LastName } }
+            $hashTable = @{ FirstName = 'Tony' ; LastName = 'Stark' ; DisplayName = { "{0} {1}" -f $this.FirstName, $this.LastName } }
             $object = ConvertTo-Item -HashTable $hashTable
             $object | Should -BeOfType [PSCustomObject]
             $object | Get-Member -Name DisplayName | Select-Object -ExpandProperty MemberType | Should -Be ([System.Management.Automation.PSMemberTypes]::ScriptProperty)
@@ -55,15 +55,15 @@ Describe 'ConvertTo-Item' {
          }
          It 'Converts an array of hastables.' {
             $hashTables = @(
-               @{FirstName = 'Tony'; LastName = 'Stark' }
-               @{FirstName = 'Peter'; LastName = 'Parker' }
+               @{FirstName = 'Tony' ; LastName = 'Stark' }
+               @{FirstName = 'Peter' ; LastName = 'Parker' }
             )
 
             $items = ConvertTo-Item -HashTable $hashTables
 
             $expectedItems = @(
-               [PSCustomObject]@{ FirstName = 'Tony'; LastName = 'Stark' }
-               [PSCustomObject]@{ FirstName = 'Peter'; LastName = 'Parker' }
+               [PSCustomObject]@{ FirstName = 'Tony' ; LastName = 'Stark' }
+               [PSCustomObject]@{ FirstName = 'Peter' ; LastName = 'Parker' }
             )
             $items.Count | Should -Be 2
             Compare-Item -ReferenceItem $expectedItems[0] -DifferenceItem $items[0] | Should -BeNullOrEmpty
@@ -71,17 +71,17 @@ Describe 'ConvertTo-Item' {
          }
          It 'Skips empty HashTables.' {
             $hashTables = @(
-               @{ FirstName = 'Tony'; LastName = 'Stark' }
+               @{ FirstName = 'Tony' ; LastName = 'Stark' }
                @{ }, @{ }
-               @{ FirstName = 'Peter'; LastName = 'Parker' }
+               @{ FirstName = 'Peter' ; LastName = 'Parker' }
                @{ }
             )
 
             $items = ConvertTo-Item -HashTable $hashTables
 
             $expectedItems = @(
-               [PSCustomObject]@{ FirstName = 'Tony'; LastName = 'Stark' }
-               [PSCustomObject]@{ FirstName = 'Peter'; LastName = 'Parker' }
+               [PSCustomObject]@{ FirstName = 'Tony' ; LastName = 'Stark' }
+               [PSCustomObject]@{ FirstName = 'Peter' ; LastName = 'Parker' }
             )
             $items.Count | Should -Be 2
             Compare-Item -ReferenceItem $expectedItems[0] -DifferenceItem $items[0] | Should -BeNullOrEmpty
@@ -101,15 +101,15 @@ Describe 'ConvertTo-Item' {
          }
          It 'Converts an array of hastables.' {
             $hashTables = @(
-               @{ FirstName = 'Tony'; LastName = 'Stark' }
-               @{ FirstName = 'Peter'; LastName = 'Parker' }
+               @{ FirstName = 'Tony' ; LastName = 'Stark' }
+               @{ FirstName = 'Peter' ; LastName = 'Parker' }
             )
 
             $items = $hashTables | ConvertTo-Item
 
             $expectedItems = @(
-               [PSCustomObject]@{ FirstName = 'Tony'; LastName = 'Stark' }
-               [PSCustomObject]@{ FirstName = 'Peter'; LastName = 'Parker' }
+               [PSCustomObject]@{ FirstName = 'Tony' ; LastName = 'Stark' }
+               [PSCustomObject]@{ FirstName = 'Peter' ; LastName = 'Parker' }
             )
             $items.Count | Should -Be 2
             Compare-Item -ReferenceItem $expectedItems[0] -DifferenceItem $items[0] | Should -BeNullOrEmpty
@@ -117,17 +117,17 @@ Describe 'ConvertTo-Item' {
          }
          It 'Skips empty HashTables.' {
             $hashTables = @(
-               @{ FirstName = 'Tony'; LastName = 'Stark' }
+               @{ FirstName = 'Tony' ; LastName = 'Stark' }
                @{ }, @{ }
-               @{ FirstName = 'Peter'; LastName = 'Parker' }
+               @{ FirstName = 'Peter' ; LastName = 'Parker' }
                @{ }
             )
 
             $items = $hashTables | ConvertTo-Item
 
             $expectedItems = @(
-               [PSCustomObject]@{ FirstName = 'Tony'; LastName = 'Stark' }
-               [PSCustomObject]@{ FirstName = 'Peter'; LastName = 'Parker' }
+               [PSCustomObject]@{ FirstName = 'Tony' ; LastName = 'Stark' }
+               [PSCustomObject]@{ FirstName = 'Peter' ; LastName = 'Parker' }
             )
             $items.Count | Should -Be 2
             Compare-Item -ReferenceItem $expectedItems[0] -DifferenceItem $items[0] | Should -BeNullOrEmpty

@@ -25,10 +25,10 @@ Describe 'Resolve-DefaultItem' {
          It 'Is based only on Item''s Name property.' {
             Mock -CommandName Test-Item -ModuleName Item -ParameterFilter { $Valid.IsPresent } -MockWith { $true <# assumes every item is valid #> }
             $hashTables = @(
-               @{ Path = '*'; FirstName = 'Tony' },
-               @{ Path = '*'; LastName = 'Stark' },
-               @{ Path = 'dn'; DisplayName = 'Tony Stark' },
-               @{ Path = 'an'; Alias = 'Iron Man' }
+               @{ Path = '*' ; FirstName = 'Tony' },
+               @{ Path = '*' ; LastName = 'Stark' },
+               @{ Path = 'dn' ; DisplayName = 'Tony Stark' },
+               @{ Path = 'an' ; Alias = 'Iron Man' }
             )
 
             $defaultItem = Resolve-DefaultItem -ItemGroup $hashTables
@@ -39,8 +39,8 @@ Describe 'Resolve-DefaultItem' {
          It 'Ignores invalid Items even when Name property is ''*''.' {
             Mock -CommandName Test-Item -ModuleName Item -ParameterFilter { $Valid.IsPresent } -MockWith { $false <# assumes every item is invalid #> }
             $hashTables = @(
-               @{ Path = 'z:\notfound\file.txt'; Name = '*' },
-               @{ Path = $null; Name = '*' },
+               @{ Path = 'z:\notfound\file.txt' ; Name = '*' },
+               @{ Path = $null ; Name = '*' },
                @{ Name = $null }
             )
 
@@ -54,10 +54,10 @@ Describe 'Resolve-DefaultItem' {
       Context 'Default Item resolution when there is no default Item' {
          It 'Returns an empty default Item.' {
             $hashTables = @(
-               @{ Name = 'fn'; FirstName = 'Tony' },
-               @{ Name = 'ln'; LastName = 'Stark' },
-               @{ Name = 'dn'; DisplayName = 'Tony Stark' },
-               @{ Name = 'an'; Alias = 'Iron Man' }
+               @{ Name = 'fn' ; FirstName = 'Tony' },
+               @{ Name = 'ln' ; LastName = 'Stark' },
+               @{ Name = 'dn' ; DisplayName = 'Tony Stark' },
+               @{ Name = 'an' ; Alias = 'Iron Man' }
             )
 
             $defaultItem = Resolve-DefaultItem -ItemGroup $hashTables
@@ -70,28 +70,28 @@ Describe 'Resolve-DefaultItem' {
       Context 'Default Item resolution when there are multiple default Items' {
          It 'Merges all default Items.' {
             $hashTables = @(
-               @{ Name = '*'; FirstName = 'Tony' },
-               @{ Name = '*'; LastName = 'Stark' },
-               @{ Name = 'dn'; DisplayName = 'Tony Stark' },
-               @{ Name = 'an'; Alias = 'Iron Man' }
+               @{ Name = '*' ; FirstName = 'Tony' },
+               @{ Name = '*' ; LastName = 'Stark' },
+               @{ Name = 'dn' ; DisplayName = 'Tony Stark' },
+               @{ Name = 'an' ; Alias = 'Iron Man' }
             )
 
             $defaultItem = Resolve-DefaultItem -ItemGroup $hashTables
 
-            $expectedResult = @{ Name = '*'; FirstName = 'Tony'; LastName = 'Stark' }
+            $expectedResult = @{ Name = '*' ; FirstName = 'Tony' ; LastName = 'Stark' }
             Compare-HashTable -ReferenceHashTable $expectedResult -DifferenceHashTable $defaultItem | Should -BeNullOrEmpty
          }
          It 'Overwrites common properties with last met default Item''s ones.' {
             $hashTables = @(
-               @{ Name = '*'; FirstName = 'Peter' },
-               @{ Name = '*'; FirstName = 'Tony'; LastName = 'Stark' },
-               @{ Name = 'dn'; DisplayName = 'Tony Stark' },
-               @{ Name = 'an'; Alias = 'Iron Man' }
+               @{ Name = '*' ; FirstName = 'Peter' },
+               @{ Name = '*' ; FirstName = 'Tony' ; LastName = 'Stark' },
+               @{ Name = 'dn' ; DisplayName = 'Tony Stark' },
+               @{ Name = 'an' ; Alias = 'Iron Man' }
             )
 
             $defaultItem = Resolve-DefaultItem -ItemGroup $hashTables
 
-            $expectedResult = @{ Name = '*'; FirstName = 'Tony'; LastName = 'Stark' }
+            $expectedResult = @{ Name = '*' ; FirstName = 'Tony' ; LastName = 'Stark' }
             Compare-HashTable -ReferenceHashTable $expectedResult -DifferenceHashTable $defaultItem | Should -BeNullOrEmpty
          }
       }

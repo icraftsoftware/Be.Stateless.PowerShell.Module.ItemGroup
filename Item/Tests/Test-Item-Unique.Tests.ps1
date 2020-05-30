@@ -23,7 +23,7 @@ Describe 'Test-Item-Unique' {
 
       Context 'Unicity check for an invalid Item' {
          It 'Ignores invalid Items during Unicity check.' {
-            $items = @( @{ Name = 'one' }, @{ Name = 'two' }, @{ Path = $null; Name = 'same' }, @{Path = $null; Name = 'same' } )
+            $items = @( @{ Name = 'one' }, @{ Name = 'two' }, @{ Path = $null ; Name = 'same' }, @{Path = $null ; Name = 'same' } )
             # even though last two Items have the same Name they are invalid
             Test-Item -Item $items -Valid -WarningAction SilentlyContinue | Should -Be @($true, $true, $false, $false)
             # and unicity check is consequently satisfied

@@ -66,8 +66,8 @@ Describe 'Compare-ItemGroup' {
 
       Context 'When both ItemGroups have a common group with one partially different Item' {
          It 'Returns ''Group1[0].Path Item1 <> Item2''.' {
-            $left = @{ Group1 = @(ConvertTo-Item @{ Path = 'Item1'; Condition = $true }) }
-            $right = @{ Group1 = @(ConvertTo-Item @{ Path = 'Item2'; Condition = $true }) }
+            $left = @{ Group1 = @(ConvertTo-Item @{ Path = 'Item1' ; Condition = $true }) }
+            $right = @{ Group1 = @(ConvertTo-Item @{ Path = 'Item2' ; Condition = $true }) }
 
             $result = Compare-ItemGroup $left $right
 
@@ -113,10 +113,10 @@ Describe 'Compare-ItemGroup' {
          It 'Returns ''MetaData {Description, Name} <''.' {
             $left = @{
                MetaData = @{ Name = 'metadata-name-1' ; Description = 'metadata-description-1' }
-               Group1   = @(ConvertTo-Item @{ Path = 'Item1'; Condition = $true })
+               Group1   = @(ConvertTo-Item @{ Path = 'Item1' ; Condition = $true })
             }
             $right = @{
-               Group1 = @(ConvertTo-Item @{ Path = 'Item1'; Condition = $true })
+               Group1 = @(ConvertTo-Item @{ Path = 'Item1' ; Condition = $true })
             }
 
             $result = Compare-ItemGroup $left $right
@@ -129,11 +129,11 @@ Describe 'Compare-ItemGroup' {
          }
          It 'Returns ''MetaData > {Description, Name}''.' {
             $left = @{
-               Group1 = @(ConvertTo-Item @{ Path = 'Item1'; Condition = $true })
+               Group1 = @(ConvertTo-Item @{ Path = 'Item1' ; Condition = $true })
             }
             $right = @{
                MetaData = @{ Name = 'metadata-name-1' ; Description = 'metadata-description-1' }
-               Group1   = @(ConvertTo-Item @{ Path = 'Item1'; Condition = $true })
+               Group1   = @(ConvertTo-Item @{ Path = 'Item1' ; Condition = $true })
             }
 
             $result = Compare-ItemGroup $left $right
@@ -150,11 +150,11 @@ Describe 'Compare-ItemGroup' {
          It 'Returns ''MetaData {Description, Name} <> {Description, Name}''.' {
             $left = @{
                MetaData = @{ Name = 'metadata-name-1' ; Description = 'metadata-description-1' }
-               Group1   = @(ConvertTo-Item @{ Path = 'Item1'; Condition = $true })
+               Group1   = @(ConvertTo-Item @{ Path = 'Item1' ; Condition = $true })
             }
             $right = @{
                MetaData = @{ Name = 'metadata-name-2' ; Description = 'metadata-description-2' }
-               Group1   = @(ConvertTo-Item @{ Path = 'Item1'; Condition = $true })
+               Group1   = @(ConvertTo-Item @{ Path = 'Item1' ; Condition = $true })
             }
 
             $result = Compare-ItemGroup $left $right
