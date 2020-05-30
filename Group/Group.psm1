@@ -73,8 +73,6 @@ function Expand-ItemGroup {
         $expandedItemGroup = @{ }
     }
     process {
-        # warns about every duplicate ItemGroup and Item
-        $ItemGroup | Test-ItemGroup -Unique | Out-Null
         $ItemGroup | ForEach-Object -Process { $_ } -PipelineVariable currentItemGroup | Select-Object -ExpandProperty Keys -PipelineVariable itemGroupName | ForEach-Object -Process {
             Write-Information "Expanding ItemGroup '$itemGroupName'."
             if ($currentItemGroup.$itemGroupName -is [hashtable]) {
@@ -89,34 +87,30 @@ function Expand-ItemGroup {
             $defaultItem = Resolve-DefaultItem -ItemGroup $currentItemGroup.$itemGroupName
             $expandedItemGroup.$itemGroupName = @(
                 $currentItemGroup.$itemGroupName |
-                    Where-Object -PipelineVariable validItem -FilterScript {
-                        # select valid and non-default Items
-                        (Test-Item -Item $_ -Valid -WarningAction SilentlyContinue) `
-                            -and ((Test-Item -Item $_ -Property Name -Mode None -WarningAction SilentlyContinue) -or $_.Name -ne '*')
-                    } |
-                    ForEach-Object -PipelineVariable flattenedItem -Process {
-                        if (Test-Item -Item $validItem -Property Path -WarningAction SilentlyContinue) {
-                            # flatten Items whose Path is a list of paths
-                            $validItem.Path |
+                    Where-Object -PipelineVariable currentItem -FilterScript { <# filter out default Items #> (Test-Item -Item $_ -Property Name -Mode None) -or $_.Name -ne '*' } |
+                    ForEach-Object -PipelineVariable resolvedItem -Process {
+                        if (Test-Item -Item $currentItem -Property Path) {
+                            # flatten Items whose Path is an array of paths
+                            $currentItem.Path |
                                 Resolve-Path -ErrorAction Stop <# throw if Path cannot be resolved #> |
                                 ForEach-Object -Process {
-                                    # rewrite Name after Path and merges validItem's other properties back into the flattened Item
-                                    Merge-HashTable -HashTable (
-                                        @{ Name = Split-Path -Path $_.ProviderPath -Leaf ; Path = $_.ProviderPath },
-                                        $validItem
-                                    )
+                                    # rewrite Name after Path and merges currentItem's other properties back into a new flattened Item
+                                    Merge-HashTable -HashTable @{ Name = Split-Path -Path $_.ProviderPath -Leaf ; Path = $_.ProviderPath }, $currentItem
                                 }
                         } else {
-                            $validItem
+                            $currentItem
                         }
                     } |
-                    ForEach-Object -Process { Merge-HashTable -HashTable $flattenedItem, $defaultItem } |
-                    Where-Object -FilterScript { (Test-Item -Item $_ -Property Condition -Mode None) -or $_.Condition } |
+                    Where-Object -PipelineVariable validItem -FilterScript { <# filter out invalid Items #> Test-Item -Item $resolvedItem -Valid } |
+                    ForEach-Object -PipelineVariable expandedItem -Process { Merge-HashTable -HashTable $validItem, $defaultItem } |
+                    Where-Object -FilterScript { (Test-Item -Item $expandedItem -Property Condition -Mode None) -or $_.Condition } |
                     ConvertTo-Item
             )
         }
     }
     end {
+        # warns about every duplicate ItemGroup and Item
+        $expandedItemGroup | Test-ItemGroup -Unique | Out-Null
         $expandedItemGroup
     }
 }

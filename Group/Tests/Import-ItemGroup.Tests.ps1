@@ -25,7 +25,7 @@ Describe 'Import-ItemGroup' {
             It 'Extracts ItemGroup file path from command invocation.' {
                 Mock -Verifiable -CommandName Test-Path -ParameterFilter { $Path -eq 'Variable:Path' } -MockWith { $false }
                 Mock -Verifiable -CommandName Get-PSCallStack -MockWith { @( [PSCustomObject]@{ } , [PSCustomObject]@{ Position = [PSCustomObject]@{ Text = 'Get-Help -Name Import-ItemGroup -Path c:\files\ItemGroup.psd1' } } ) }
-                Mock -Verifiable -CommandName Test-Path -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' }-MockWith { $true }
+                Mock -Verifiable -CommandName Test-Path -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' } -MockWith { $true }
                 Mock -Verifiable -CommandName Get-Item -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' } -MockWith { [PSCustomObject]@{ PSIsContainer = $false } }
                 Mock -Verifiable -CommandName Get-Content -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' -and $Raw.IsPresent }
 
@@ -36,8 +36,7 @@ Describe 'Import-ItemGroup' {
             It 'Describes CmdletBinding''s parameter section of referenced ItemGroup file.' {
                 Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'Variable:Path' } -MockWith { $false }
                 Mock -CommandName Get-PSCallStack -MockWith { @( [PSCustomObject]@{ } , [PSCustomObject]@{ Position = [PSCustomObject]@{ Text = 'Get-Help -Name Import-ItemGroup -Path c:\files\ItemGroup.psd1' } } ) }
-                Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' }-MockWith { $true }
-                Mock -CommandName Get-Item -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' } -MockWith { [PSCustomObject]@{ PSIsContainer = $false } }
+                Mock -CommandName Test-Path -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' } -MockWith { $true }
                 Mock -CommandName Get-Content -ParameterFilter { $Path -eq 'c:\files\ItemGroup.psd1' -and $Raw.IsPresent } -MockWith { @'
 [CmdletBinding()]
 param(
