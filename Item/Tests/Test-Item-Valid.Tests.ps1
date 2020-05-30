@@ -61,7 +61,7 @@ Describe 'Test-Item-Valid' {
             Mock -CommandName Test-Path -MockWith { $false <# assumes every path is either invalid or a folder #> } -ParameterFilter { $PathType -eq 'Leaf' }
             Test-Item -Item @(@{ Path = 'a:\folder' }, [PSCustomObject]@{ Path = 'a:\folder' }) -Valid -WarningAction SilentlyContinue | Should -Be ($false, $false)
          }
-         It 'Returns (true, true) when both Item have a valid Path property to a file and has no Name property.' {
+         It 'Returns (true, true) when both Items have a valid Path property to a file and has no Name property.' {
             Mock -CommandName Test-Path -MockWith { $true <# assumes every path is valid #> } -ParameterFilter { $PathType -eq 'Leaf' }
             Test-Item -Item @(@{ Path = 'a:\folder\file.txt' }, [PSCustomObject]@{ Path = 'a:\folder\file.txt' }) -Valid | Should -Be ($true, $true)
          }
@@ -85,6 +85,9 @@ Describe 'Test-Item-Valid' {
          It 'Returns (true, true) when both Items have a non null Name property.' {
             @{ Name = 'Stark' }, [PSCustomObject]@{ Name = 'Parker' } | Test-Item -Valid | Should -Be ($true, $true)
          }
+         It 'Returns (false, false) when both Items have a Name property that is an array of values.' {
+            @{ Name = @('Stark', 'Potts') }, [PSCustomObject]@{ Name = @('Parker', 'Happy') } | Test-Item -Valid -WarningAction SilentlyContinue | Should -Be ($false, $false)
+         }
          It 'Returns (false, false) when both Items have a null Path property.' {
             @{ Path = $null }, [PSCustomObject]@{ Path = $null } | Test-Item -Valid -WarningAction SilentlyContinue | Should -Be ($false, $false)
          }
@@ -96,9 +99,13 @@ Describe 'Test-Item-Valid' {
             Mock -CommandName Test-Path -MockWith { $false <# assumes every path is either invalid or a folder #> } -ParameterFilter { $PathType -eq 'Leaf' }
             @(@{ Path = 'a:\folder' }, [PSCustomObject]@{ Path = 'a:\folder' }) | Test-Item -Valid -WarningAction SilentlyContinue | Should -Be ($false, $false)
          }
-         It 'Returns (true, true) when both Item have a valid Path property to a file and has no Name property.' {
+         It 'Returns (true, true) when both Items have a valid Path property to a file and has no Name property.' {
             Mock -CommandName Test-Path -MockWith { $true <# assumes every path is valid #> } -ParameterFilter { $PathType -eq 'Leaf' }
             @(@{ Path = 'a:\folder\file.txt' }, [PSCustomObject]@{ Path = 'a:\folder\file.txt' }) | Test-Item -Valid | Should -Be ($true, $true)
+         }
+         It 'Returns (false, false) when both Items have a Path property that is an array of values.' {
+            Mock -CommandName Test-Path -MockWith { $true <# assumes every path is valid #> } -ParameterFilter { $PathType -eq 'Leaf' }
+            @(@{ Path = @('a:\folder\file.txt', 'a:\folder\file.txt') }, [PSCustomObject]@{ Path = @('a:\folder\file.txt', 'a:\folder\file.txt') }) | Test-Item -Valid -WarningAction SilentlyContinue | Should -Be ($false, $false)
          }
          It 'Returns (false, false) although Item.Names are non-null because *invalid* Item.Paths have precedence.' {
             Mock -CommandName Test-Path -MockWith { $false <# assumes every path is either invalid or a folder #> } -ParameterFilter { $PathType -eq 'Leaf' }
