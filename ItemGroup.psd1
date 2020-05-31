@@ -18,7 +18,7 @@
 
 @{
    RootModule            = 'ItemGroup.psm1'
-   ModuleVersion         = '2.2.0.0'
+   ModuleVersion         = '2.2.0.1'
    GUID                  = 'bf08c9f4-bf1f-4e94-92d4-7e3b47a9baee'
    Author                = 'François Chabot'
    CompanyName           = 'be.stateless'
@@ -31,6 +31,15 @@
 
    AliasesToExport       = @()
    CmdletsToExport       = @()
-   FunctionsToExport     = @('Compare-ItemGroup', 'Expand-ItemGroup', 'Import-ItemGroup', 'Test-ItemGroup')
+   FunctionsToExport     = @(
+      # Item.psm1
+      'Compare-Item',
+      'Test-Item',
+      # Group.psm1
+      'Compare-ItemGroup',
+      'Expand-ItemGroup',
+      'Import-ItemGroup',
+      'Test-ItemGroup'
+   )
    VariablesToExport     = @()
 }
