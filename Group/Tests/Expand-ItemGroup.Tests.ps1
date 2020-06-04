@@ -282,6 +282,24 @@ Describe 'Expand-ItemGroup' {
          }
       }
 
+      Context 'Expansion flattens Item.Name property' {
+         It 'Flattens Item whose Name property denotes an array of Names.' {
+            $actualItemGroup = @(@{ Group1 = @(@{Name = @('BeginTime', 'InterchangeID', 'ProcessName') ; Activity = 'Process' }) })
+
+            $expandedItemGroup = Expand-ItemGroup -ItemGroup $actualItemGroup
+
+            $expectedItemGroup = @{
+               Group1 = @(
+                  ConvertTo-Item @{ Name = 'BeginTime' ; Activity = 'Process' }
+                  ConvertTo-Item @{ Name = 'InterchangeID' ; Activity = 'Process' }
+                  ConvertTo-Item @{ Name = 'ProcessName' ; Activity = 'Process' }
+               )
+            }
+            Compare-ItemGroup -ReferenceItemGroup $expectedItemGroup -DifferenceItemGroup $expandedItemGroup -Verbose | Should -BeNullOrEmpty
+         }
+
+      }
+
       Context 'Expansion flattens Item.Path property' {
          It 'Flattens Item whose Path property denotes an array of paths.' {
             $actualItemGroup = @(@{ Group1 = @(@{Path = @('TestDrive:\one.txt', 'TestDrive:\two.txt', 'TestDrive:\six.txt') ; Condition = $true }) })
@@ -374,7 +392,7 @@ Describe 'Expand-ItemGroup' {
          }
       }
 
-      Context 'Expansion informs about progress' {
+      Context 'Expansion is informing about progress' {
          Mock -CommandName Write-Information
          It 'Informs about each ItemGroup that is expanded.' {
             $actualItemGroup = @(

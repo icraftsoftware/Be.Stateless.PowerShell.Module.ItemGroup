@@ -94,10 +94,18 @@ function Expand-ItemGroup {
                             $currentItem.Path |
                                 Resolve-Path -ErrorAction Stop <# throw if Path cannot be resolved #> |
                                 ForEach-Object -Process {
-                                    # rewrite Name after Path and merges currentItem's other properties back into a new flattened Item
+                                    # rewrite Name after Path and merge currentItem's other properties back into a new flattened Item
                                     Merge-HashTable -HashTable @{ Name = Split-Path -Path $_.ProviderPath -Leaf ; Path = $_.ProviderPath }, $currentItem
                                 }
+                        } elseif (Test-Item -Item $currentItem -Property Name) {
+                            # flatten Items whose Name is an array of names
+                            $currentItem.Name |
+                                ForEach-Object -Process {
+                                    # merge currentItem's other properties back into a new flattened Item
+                                    Merge-HashTable -HashTable @{ Name = $_ }, $currentItem
+                                }
                         } else {
+                            # even though this item is invalid, pass it along anyway to let subsequent Test-ITem -Valid filter it out and, more importantly, warn about the issue
                             $currentItem
                         }
                     } |
@@ -109,7 +117,7 @@ function Expand-ItemGroup {
         }
     }
     end {
-        # warns about every duplicate ItemGroup and Item
+        # warn about every duplicate ItemGroup and Item
         $expandedItemGroup | Test-ItemGroup -Unique | Out-Null
         $expandedItemGroup
     }
@@ -153,7 +161,7 @@ function Import-ItemGroup {
         Write-Verbose -Message "Setting location to '$itemGroupFolderPath'."
         Push-Location -Path $itemGroupFolderPath
 
-        ## TODO enrich HashTable with source file to provide better diagnostics info
+        # TODO enrich HashTable with source file to provide better diagnostics info
         Invoke-ScriptBlock -ScriptBlock $scriptBlock -Parameters $PSBoundParameters |
             <# pipe ItemGroups to support array of HashTables and not just a single HashTable #>
             ForEach-Object -Process {
