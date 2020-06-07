@@ -288,12 +288,10 @@ Describe 'Expand-ItemGroup' {
 
             $expandedItemGroup = Expand-ItemGroup -ItemGroup $actualItemGroup
 
-            $expectedItemGroup = @{
-               Group1 = @(
+            $expectedItemGroup = @{Group1 = @(
                   ConvertTo-Item @{ Name = 'BeginTime' ; Activity = 'Process' }
                   ConvertTo-Item @{ Name = 'InterchangeID' ; Activity = 'Process' }
-                  ConvertTo-Item @{ Name = 'ProcessName' ; Activity = 'Process' }
-               )
+                  ConvertTo-Item @{ Name = 'ProcessName' ; Activity = 'Process' })
             }
             Compare-ItemGroup -ReferenceItemGroup $expectedItemGroup -DifferenceItemGroup $expandedItemGroup -Verbose | Should -BeNullOrEmpty
          }
@@ -306,12 +304,10 @@ Describe 'Expand-ItemGroup' {
 
             $expandedItemGroup = Expand-ItemGroup -ItemGroup $actualItemGroup
 
-            $expectedItemGroup = @{
-               Group1 = @(
+            $expectedItemGroup = @{Group1 = @(
                   ConvertTo-Item @{ Name = 'one.txt' ; Path = 'TestDrive:\one.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true }
                   ConvertTo-Item @{ Name = 'two.txt' ; Path = 'TestDrive:\two.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true }
-                  ConvertTo-Item @{ Name = 'six.txt' ; Path = 'TestDrive:\six.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true }
-               )
+                  ConvertTo-Item @{ Name = 'six.txt' ; Path = 'TestDrive:\six.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true })
             }
             Compare-ItemGroup -ReferenceItemGroup $expectedItemGroup -DifferenceItemGroup $expandedItemGroup -Verbose | Should -BeNullOrEmpty
          }
@@ -323,12 +319,10 @@ Describe 'Expand-ItemGroup' {
 
             $expandedItemGroup = $actualItemGroup | Expand-ItemGroup
 
-            $expectedItemGroup = @{
-               Group1 = @(
+            $expectedItemGroup = @{Group1 = @(
                   ConvertTo-Item @{ Name = 'one.txt' ; Path = 'TestDrive:\one.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true ; Extra = 'Dummy' }
                   ConvertTo-Item @{ Name = 'two.txt' ; Path = 'TestDrive:\two.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true ; Extra = 'Dummy' }
-                  ConvertTo-Item @{ Name = 'six.txt' ; Path = 'TestDrive:\six.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true ; Extra = 'Dummy' }
-               )
+                  ConvertTo-Item @{ Name = 'six.txt' ; Path = 'TestDrive:\six.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath ; Condition = $true ; Extra = 'Dummy' })
             }
             Compare-ItemGroup -ReferenceItemGroup $expectedItemGroup -DifferenceItemGroup $expandedItemGroup | Should -BeNullOrEmpty
          }
@@ -341,14 +335,12 @@ Describe 'Expand-ItemGroup' {
 
             $expandedItemGroup = Expand-ItemGroup -ItemGroup $actualItemGroup
 
-            $expectedItemGroup = @{
-               Group1 = @(
+            $expectedItemGroup = @{Group1 = @(
                   ConvertTo-Item @{ Name = 'one.txt' ; Path = 'TestDrive:\one.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'two.txt' ; Path = 'TestDrive:\two.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'six.txt' ; Path = 'TestDrive:\six.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'ten.txt' ; Path = 'TestDrive:\ten.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
-                  ConvertTo-Item @{ Name = 'abc.txt' ; Path = 'TestDrive:\abc.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
-               )
+                  ConvertTo-Item @{ Name = 'abc.txt' ; Path = 'TestDrive:\abc.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath })
             }
             Compare-ItemGroup -ReferenceItemGroup $expectedItemGroup -DifferenceItemGroup $expandedItemGroup | Should -BeNullOrEmpty
          }
@@ -361,14 +353,12 @@ Describe 'Expand-ItemGroup' {
 
             $expandedItemGroup = Expand-ItemGroup -ItemGroup $actualItemGroup
 
-            $expectedItemGroup = @{
-               Group1 = @(
+            $expectedItemGroup = @{Group1 = @(
                   ConvertTo-Item @{ Name = 'one.txt' ; Path = 'TestDrive:\one.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'abc.txt' ; Path = 'TestDrive:\abc.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'six.txt' ; Path = 'TestDrive:\six.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'ten.txt' ; Path = 'TestDrive:\ten.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
-                  ConvertTo-Item @{ Name = 'two.txt' ; Path = 'TestDrive:\two.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
-               )
+                  ConvertTo-Item @{ Name = 'two.txt' ; Path = 'TestDrive:\two.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath })
             }
             Compare-ItemGroup -ReferenceItemGroup $expectedItemGroup -DifferenceItemGroup $expandedItemGroup | Should -BeNullOrEmpty
          }
@@ -379,14 +369,12 @@ Describe 'Expand-ItemGroup' {
 
             $expandedItemGroup = Expand-ItemGroup -ItemGroup $actualItemGroup
 
-            $expectedItemGroup = @{
-               Group1 = @(
+            $expectedItemGroup = @{Group1 = @(
                   ConvertTo-Item @{ Name = 'abc.txt' ; Path = 'TestDrive:\abc.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'one.txt' ; Path = 'TestDrive:\one.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'six.txt' ; Path = 'TestDrive:\six.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
                   ConvertTo-Item @{ Name = 'ten.txt' ; Path = 'TestDrive:\ten.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
-                  ConvertTo-Item @{ Name = 'two.txt' ; Path = 'TestDrive:\two.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath }
-               )
+                  ConvertTo-Item @{ Name = 'two.txt' ; Path = 'TestDrive:\two.txt' | Resolve-Path | Select-Object -ExpandProperty ProviderPath })
             }
             Compare-ItemGroup -ReferenceItemGroup $expectedItemGroup -DifferenceItemGroup $expandedItemGroup | Should -BeNullOrEmpty
          }

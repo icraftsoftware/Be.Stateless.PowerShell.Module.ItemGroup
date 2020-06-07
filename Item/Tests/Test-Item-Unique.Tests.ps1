@@ -26,7 +26,7 @@ Describe 'Test-Item-Unique' {
             $items = @( @{ Name = 'one' }, @{ Name = 'two' }, @{ Path = $null ; Name = 'same' }, @{Path = $null ; Name = 'same' } )
             # even though last two Items have the same Name they are invalid
             Test-Item -Item $items -Valid -WarningAction SilentlyContinue | Should -Be @($true, $true, $false, $false)
-            # and unicity check is consequently satisfied
+            # and unicity check is consequently satisfied because invalid Items are discarded
             Test-Item -Item $items -Unique -WarningAction SilentlyContinue | Should -BeTrue
 
             # whereas if all Items are assumed to be valid
@@ -42,11 +42,23 @@ Describe 'Test-Item-Unique' {
 
       Context 'Unicity check when Items are given by argument' {
          Mock -CommandName Test-Item -ParameterFilter { $Valid.IsPresent } -MockWith { $true <# assumes every Item is valid #> }
-         It 'Returns true when Items have different Names.' {
+         It 'Returns true when hashtable Items have different Names.' {
+            Test-Item -Item @( @{ Name = 'one' }, @{ Name = 'two' } ) -Unique | Should -BeTrue
+         }
+         It 'Returns false when hashtable Items have the same Name.' {
+            Test-Item -Item @( @{ Name = 'one' }, @{ Name = 'one' } ) -Unique -WarningAction SilentlyContinue | Should -BeFalse
+         }
+         It 'Returns true when a mix of Items have different Names.' {
             Test-Item -Item @( @{ Name = 'one' }, [PSCustomObject]@{ Name = 'two' } ) -Unique | Should -BeTrue
          }
-         It 'Returns false when Items have the same Name.' {
+         It 'Returns false when a mix of Items have the same Name.' {
             Test-Item -Item @( @{ Name = 'one' }, [PSCustomObject]@{ Name = 'one' } ) -Unique -WarningAction SilentlyContinue | Should -BeFalse
+         }
+         It 'Returns true when object Items have different Names.' {
+            Test-Item -Item @( [PSCustomObject]@{ Name = 'one' }, [PSCustomObject]@{ Name = 'two' } ) -Unique | Should -BeTrue
+         }
+         It 'Returns false when object Items have the same Name.' {
+            Test-Item -Item @( [PSCustomObject]@{ Name = 'one' }, [PSCustomObject]@{ Name = 'one' } ) -Unique -WarningAction SilentlyContinue | Should -BeFalse
          }
          It 'Returns true when Items have different Paths.' {
             Test-Item -Item @( @{ Path = 'z:\one' }, [PSCustomObject]@{ Path = 'z:\two' } ) -Unique | Should -BeTrue
@@ -63,6 +75,18 @@ Describe 'Test-Item-Unique' {
          It 'Returns false for an array of Items.' {
             $items = @( @{Name = 'One' }, @{Name = 'Two' }, @{Name = 'One' }, @{Name = 'Two' }, @{Name = 'Three' } )
             Test-Item -Item $items -Unique -WarningAction SilentlyContinue | Should -BeFalse
+         }
+         It 'Returns true only if all the properties of hashtable Items are different.' {
+            Test-Item -Item @( @{ Name = 'one' ; Type = 'a' }, @{ Name = 'one' ; Type = 'b' } ) -Unique | Should -BeTrue
+         }
+         It 'Returns true only if all the properties of object Items are different.' {
+            Test-Item -Item @( [PSCustomObject]@{ Name = 'one' ; Type = 'a' }, [PSCustomObject]@{ Name = 'one' ; Type = 'b' } ) -Unique | Should -BeTrue
+         }
+         It 'Returns true if Item.Paths are different regardlessly of other properties.' {
+            Test-Item -Item @( [PSCustomObject]@{ Path = 'Z:\one' ; Name = 'one' ; Type = 'a' }, [PSCustomObject]@{ Path = 'z:\two' ; Name = 'one' ; Type = 'a' } ) -Unique | Should -BeTrue
+         }
+         It 'Returns false if Item.Paths are the same regardlessly of other properties.' {
+            Test-Item -Item @( @{ Path = 'Z:\one' ; Name = 'one' ; Type = 'a' }, @{ Path = 'z:\one' ; Name = 'two' ; Type = 'b' } ) -Unique -WarningAction SilentlyContinue | Should -BeFalse
          }
          It 'Returns false for an array of array of Items.' {
             $items = @(
@@ -107,16 +131,18 @@ Describe 'Test-Item-Unique' {
       }
 
       Context "Unicity check is warning about any unicity issue" {
+         Mock -CommandName Test-Item -ParameterFilter { $Valid.IsPresent } -MockWith { $true <# assumes every Item is valid #> }
          Mock -CommandName Write-Warning
          It 'Warns about each property of every duplicate Item.' {
-            @{ Name = 'One' ; City = 'City' ; Street = 'one' }, @{ Name = 'Two' ; City = 'City' ; Street = 'two' }, @{ Name = 'One' ; City = 'City' ; Street = 'six' } | Test-Item -Unique | Should -BeFalse
+            @{ Path = 'z:\one' ; Name = 'One' ; City = 'City' ; Street = 'one' }, @{ Path = 'z:\two' ; Name = 'Two' ; City = 'City' ; Street = 'two' }, @{ Path = 'z:\one' ; Name = 'One' ; City = 'City' ; Street = 'six' } | Test-Item -Unique | Should -BeFalse
 
-            Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -eq 'The following Item ''One'' has been defined multiple times:' } -Exactly 2
+            Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -eq 'The following Item ''z:\one'' has been defined multiple times:' } -Exactly 2
+            Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -match 'Path\s+:\s+z:\\one' } -Exactly 2
+            Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -match 'Name\s+:\s+One' } -Exactly 2
             Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -match 'Street\s+:\s+one' } -Exactly 1
             Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -match 'Street\s+:\s+six' } -Exactly 1
             Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -match 'City\s+:\s+City' } -Exactly 2
-            Assert-MockCalled -Scope It -CommandName Write-Warning -ParameterFilter { $Message -match 'Name\s+:\s+One' } -Exactly 2
-            Assert-MockCalled -Scope It -CommandName Write-Warning -Exactly 8
+            Assert-MockCalled -Scope It -CommandName Write-Warning -Exactly 10
          }
          It 'Warns about any duplicate Item when Items are given by the pipeline.' {
             @{ Name = 'One' }, @{ Name = 'Two' }, @{ Name = 'One' }, @{ Name = 'Two' }, @{ Name = 'Three' } | Test-Item -Unique | Should -BeFalse

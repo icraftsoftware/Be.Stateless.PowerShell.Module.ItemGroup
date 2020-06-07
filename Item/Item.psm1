@@ -37,10 +37,10 @@ function Compare-Item {
         $Prefix = ''
     )
     Resolve-ActionPreference -Cmdlet $PSCmdlet -SessionState $ExecutionContext.SessionState
-    if ($null -eq $ReferenceItem) { $ReferenceItem = [PSCustomObject]@{ } }
-    if ($null -eq $DifferenceItem) { $DifferenceItem = [PSCustomObject]@{ } }
-    $referenceProperties = @( $ReferenceItem | Get-Member -MemberType NoteProperty, ScriptProperty | Select-Object -ExpandProperty Name)
-    $differenceProperties = @( $DifferenceItem | Get-Member -MemberType NoteProperty, ScriptProperty | Select-Object -ExpandProperty Name)
+    $ReferenceItem = if ($null -eq $ReferenceItem) { [PSCustomObject]@{ } } else { [PSCustomObject]$ReferenceItem }
+    $DifferenceItem = if ($null -eq $DifferenceItem) { [PSCustomObject]@{ } } else { [PSCustomObject]$DifferenceItem }
+    $referenceProperties = @(Get-ItemPropertyNames -Item $ReferenceItem)
+    $differenceProperties = @(Get-ItemPropertyNames -Item $DifferenceItem)
     $referenceProperties + $differenceProperties | Select-Object -Unique -PipelineVariable key | ForEach-Object -Process {
         $propertyName = if ($Prefix) { "$Prefix.$key" } else { $key }
         if ($referenceProperties.Contains($key) -and !$differenceProperties.Contains($key)) {
@@ -133,24 +133,6 @@ function Test-Item {
     }
     process {
 
-        function Get-ItemPropertyMembers {
-            [CmdletBinding()]
-            [OutputType([psobject[]])]
-            param(
-                [Parameter(Mandatory = $true)]
-                [AllowNull()]
-                [psobject]
-                $Item
-            )
-            if ($Item -is [hashtable]) {
-                @($Item.Keys)
-            } elseif ($Item -is [PSCustomObject]) {
-                @(Get-Member -InputObject $Item -MemberType  NoteProperty, ScriptProperty | Select-Object -ExpandProperty Name)
-            } else {
-                @()
-            }
-        }
-
         function Trace-InvalidItem {
             [CmdletBinding()]
             [OutputType([void])]
@@ -174,7 +156,7 @@ function Test-Item {
                 $Item | ForEach-Object -Process { $_ } -PipelineVariable currentItem | ForEach-Object -Process {
                     $isMember = $false
                     if (Test-Item -Item $currentItem -WellFormed) {
-                        $members = Get-ItemPropertyMembers -Item $currentItem
+                        $members = @(Get-ItemPropertyNames -Item $currentItem)
                         switch ($Mode) {
                             'All' {
                                 $isMember = $Property | Where-Object -FilterScript { $members -notcontains $_ } | Test-None
@@ -222,7 +204,7 @@ function Test-Item {
             }
             'well-formedness' {
                 $Item | ForEach-Object -Process { $_ } -PipelineVariable currentItem | ForEach-Object -Process {
-                    Get-ItemPropertyMembers -Item $currentItem | Test-Any
+                    @(Get-ItemPropertyNames -Item $currentItem) | Test-Any
                 }
             }
         }
@@ -256,10 +238,39 @@ function Test-Item {
                 # Path property has the precedence over the Name property when grouping Items
                 $allValidItems |
                     Group-Object -Property { if (Test-Item -Item $_ -Property Path) { $_.Path } else { $_.Name } } |
-                    Where-Object -FilterScript { $_.Count -gt 1 } |
+                    Where-Object -FilterScript { $_.Count -gt 1 } -PipelineVariable duplicateItems |
+                    Where-Object -FilterScript {
+                        # unicity test is performed wrt the Path property only for Items having such a property
+                        (Test-Item -Item $duplicateItems.Group[0] -Property Path) -or (
+                            # while the test is performed wrt all the properties for Items missing a Path property
+                            $duplicateItems.Group |
+                                Select-Object -Skip 1 |
+                                Where-Object -FilterScript { Compare-Item -ReferenceItem $duplicateItems.Group[0] -DifferenceItem $_ | Test-None } |
+                                Test-Any
+                        )
+                    } |
                     Trace-DuplicateItem |
                     Test-None
             }
         }
+    }
+}
+
+function Get-ItemPropertyNames {
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowNull()]
+        [psobject]
+        $Item
+    )
+    # see https://stackoverflow.com/a/18477004/1789441
+    if ($Item -is [hashtable]) {
+        @($Item.Keys)
+    } elseif ($Item -is [PSCustomObject]) {
+        @(Get-Member -InputObject $Item -MemberType  NoteProperty, ScriptProperty | Select-Object -ExpandProperty Name)
+    } else {
+        @()
     }
 }

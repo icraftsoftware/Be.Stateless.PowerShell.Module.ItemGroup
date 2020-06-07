@@ -27,10 +27,18 @@ Describe 'Compare-Item' {
          }
       }
 
-      Context 'When both Items have one identical entry' {
+      Context 'When both Items have one identical property' {
          It 'Returns nothing.' {
-            $left = ConvertTo-Item @{ a = "x" }
-            $right = ConvertTo-Item @{ a = "x" }
+            $left = ConvertTo-Item @{ a = 'x' }
+            $right = ConvertTo-Item @{ a = 'x' }
+            Compare-Item -ReferenceItem $left -DifferenceItem $right | Should -BeNullOrEmpty
+         }
+      }
+
+      Context 'When both Items have several identical properties' {
+         It 'Returns nothing.' {
+            $left = ConvertTo-Item @{ firstname = 'pepper' ; lastname = 'potts' ; displayname = 'pepper potts' }
+            $right = ConvertTo-Item @{ firstname = 'pepper' ; lastname = 'potts' ; displayname = 'pepper potts' }
             Compare-Item -ReferenceItem $left -DifferenceItem $right | Should -BeNullOrEmpty
          }
       }
@@ -45,7 +53,7 @@ Describe 'Compare-Item' {
             $result.Length | Should -Be 1
             $result.Key | Should -Be 'a'
             $result.ReferenceValue | Should -BeNullOrEmpty
-            $result.SideIndicator | Should -Be "<"
+            $result.SideIndicator | Should -Be '<'
             $result.DifferenceValue | Should -BeNullOrEmpty
          }
       }
@@ -60,7 +68,7 @@ Describe 'Compare-Item' {
             $result.Length | Should -Be 1
             $result.Key | Should -Be 'a'
             $result.ReferenceValue | Should -BeNullOrEmpty
-            $result.SideIndicator | Should -Be ">"
+            $result.SideIndicator | Should -Be '>'
             $result.DifferenceValue | Should -BeNullOrEmpty
          }
       }
@@ -75,8 +83,20 @@ Describe 'Compare-Item' {
             $result.Length | Should -Be 1
             $result.Key | Should -Be 'a'
             $result.ReferenceValue | Should -Be 'value'
-            $result.SideIndicator | Should -Be "<>"
+            $result.SideIndicator | Should -Be '<>'
             $result.DifferenceValue | Should -BeNullOrEmpty
+         }
+         It 'Returns ''role partner <> assistance''.' {
+            $left = ConvertTo-Item @{ firstname = 'pepper' ; lastname = 'potts' ; role = 'partner' }
+            $right = ConvertTo-Item @{ firstname = 'pepper' ; lastname = 'potts' ; role = 'assistant' }
+
+            [object[]]$result = Compare-Item -ReferenceItem $left -DifferenceItem $right
+
+            $result.Length | Should -Be 1
+            $result.Key | Should -Be 'role'
+            $result.ReferenceValue | Should -Be 'partner'
+            $result.SideIndicator | Should -Be '<>'
+            $result.DifferenceValue | Should -Be 'assistant'
          }
       }
 
